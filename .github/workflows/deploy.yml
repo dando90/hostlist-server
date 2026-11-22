@@ -23,9 +23,9 @@ jobs:
 
       - name: Prepare runtime files
         run: |
-          mkdir -p deploy/src
+          mkdir -p deploy
           cp .htaccess index.php app.js styles.css deploy/
-          cp src/database.php deploy/src/database.php
+          cp src/database.php deploy/database.php
 
       - name: Validate FTP destination
         env:
@@ -36,8 +36,8 @@ jobs:
             exit 1
           fi
           case "$FTP_SERVER_DIR" in
-            projects/hostlist-server/|*/projects/hostlist-server/) ;;
-            *) echo "FTP_SERVER_DIR must be projects/hostlist-server/ or end with /projects/hostlist-server/"; exit 1 ;;
+            projects/hostlist-server/|./projects/hostlist-server/|*/projects/hostlist-server/) ;;
+            *) echo "FTP_SERVER_DIR must point to projects/hostlist-server/ relative to the FTP root"; exit 1 ;;
           esac
 
       - name: Deploy runtime files over FTPS
