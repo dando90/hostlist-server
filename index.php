@@ -1,10 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$databaseFile = is_file(__DIR__ . '/src/database.php')
-    ? __DIR__ . '/src/database.php'
-    : __DIR__ . '/database.php';
-require $databaseFile;
+require __DIR__ . '/src/database.php';
 
 $configuredBasePath = getenv('APP_BASE_PATH');
 $basePath = rtrim((string)($configuredBasePath === false ? '/projects/hostlist-server' : $configuredBasePath), '/');

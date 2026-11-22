@@ -23,22 +23,9 @@ jobs:
 
       - name: Prepare runtime files
         run: |
-          mkdir -p deploy
+          mkdir -p deploy/src
           cp .htaccess index.php app.js styles.css deploy/
-          cp src/database.php deploy/database.php
-
-      - name: Validate FTP destination
-        env:
-          FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
-        run: |
-          if [ -z "$FTP_SERVER_DIR" ]; then
-            echo "Set the FTP_SERVER_DIR Actions variable before running a deploy."
-            exit 1
-          fi
-          case "$FTP_SERVER_DIR" in
-            projects/hostlist-server/|./projects/hostlist-server/|*/projects/hostlist-server/) ;;
-            *) echo "FTP_SERVER_DIR must point to projects/hostlist-server/ relative to the FTP root"; exit 1 ;;
-          esac
+          cp src/database.php deploy/src/database.php
 
       - name: Deploy runtime files over FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
