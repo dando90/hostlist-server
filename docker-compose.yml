@@ -2,10 +2,10 @@ services:
   db:
     image: mysql:8.4
     environment:
-      MYSQL_DATABASE: hostlist_demo
-      MYSQL_USER: hostlist
-      MYSQL_PASSWORD: hostlist-local
-      MYSQL_ROOT_PASSWORD: hostlist-root-local
+      MYSQL_DATABASE: ${DB_NAME:-hostlist_demo}
+      MYSQL_USER: ${DB_USER:-hostlist}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-hostlist-local}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-hostlist-root-local}
     volumes:
       - hostlist_mysql:/var/lib/mysql
     healthcheck:
@@ -17,11 +17,10 @@ services:
   seed:
     build: .
     command: ["php", "scripts/seed-db.php"]
+    env_file:
+      - .env
     environment:
-      DB_HOST: db
-      DB_NAME: hostlist_demo
-      DB_USER: hostlist
-      DB_PASSWORD: hostlist-local
+      DB_HOST: ${DB_HOST:-db}
     depends_on:
       db:
         condition: service_healthy
@@ -31,12 +30,11 @@ services:
     build: .
     ports:
       - "8080:80"
+    env_file:
+      - .env
     environment:
       APP_BASE_PATH: ""
-      DB_HOST: db
-      DB_NAME: hostlist_demo
-      DB_USER: hostlist
-      DB_PASSWORD: hostlist-local
+      DB_HOST: ${DB_HOST:-db}
     depends_on:
       seed:
         condition: service_completed_successfully

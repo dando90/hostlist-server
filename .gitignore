@@ -1,2 +1,5 @@
 /output/*.sql
 !/output/hostlist-seed.sql
+.env
+.env.*
+!.env.example

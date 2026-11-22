@@ -9,12 +9,13 @@ All people, organisations and opportunities are invented. The profile generator 
 Install Docker Desktop, then run from this directory:
 
 ```sh
+cp .env.example .env
 docker compose up --build
 ```
 
 Open <http://localhost:8080>. On an empty database, the `seed` service creates the schema and inserts 500 profiles before Apache starts. The MySQL data persists in the `hostlist_mysql` volume. To reset and repopulate the demo, run `docker compose down -v` followed by `docker compose up --build`.
 
-The local Compose credentials are for development only. Set strong, private database credentials on any server you control. The PHP app reads `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` from its environment. `APP_BASE_PATH` can set the public subdirectory explicitly; when unset, it defaults to `/projects/hostlist-server`. Compose sets it to an empty string for `localhost:8080`.
+The local `.env` is ignored by Git and is used by Docker Compose for development credentials. It is for local testing only. The PHP app reads `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` from process environment variables first, then from the `.env` file in the project root. `APP_BASE_PATH` can set the public subdirectory explicitly; when unset, it defaults to `/projects/hostlist-server`. Compose sets it to an empty string for `localhost:8080`.
 
 ## Synthetic data scripts
 
@@ -38,7 +39,7 @@ The list uses `id`, `fullname`, `company`, `country`, `city`, `primary_domain`, 
 
 ## Apache deployment
 
-Upload the project files to `projects/hostlist-server` on an Apache host with PHP 8.3+, PDO MySQL, and `mod_rewrite` enabled. Allow `.htaccess` overrides so the clean page and API routes reach `index.php`. Configure the database environment variables in the hosting control panel; do not publish database credentials. Run the data generator on a trusted machine and import its SQL file, or run `php scripts/seed-db.php` where PHP can reach the configured MySQL service.
+Upload the project files to the Apache document directory with PHP 8.3+, PDO MySQL, and `mod_rewrite` enabled. Allow `.htaccess` overrides so the clean page and API routes reach `index.php`. The app reads database credentials from a private PHP config file outside the public web root, using a relative path from `src/database.php`; it takes `database.dsn`, `database.username`, and `database.password` from the returned array. The local `.env` is only for Docker testing and does not need to be uploaded. If your private config is elsewhere, set `HOSTLIST_PRIVATE_CONFIG` to its filesystem path. Run the data generator on a trusted machine and import its SQL file, or run `php scripts/seed-db.php` where PHP can reach the configured MySQL service.
 
 In `HostList-Local`, `config.json` contains only the configured site origin. The extension is scoped to `https://stefanochiabrando.com/projects/hostlist-server/*` and captures the two JSON endpoints above.
 
