@@ -1,0 +1,54 @@
+name: Deploy HostList Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hostlist-server-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Package and deploy PHP demo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Prepare runtime files
+        run: |
+          mkdir -p deploy/src
+          cp .htaccess index.php app.js styles.css deploy/
+          cp src/database.php deploy/src/database.php
+
+      - name: Validate FTP destination
+        env:
+          FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
+        run: |
+          if [ -z "$FTP_SERVER_DIR" ]; then
+            echo "Set the FTP_SERVER_DIR Actions variable before running a deploy."
+            exit 1
+          fi
+          case "$FTP_SERVER_DIR" in
+            */projects/hostlist-server/) ;;
+            *) echo "FTP_SERVER_DIR must end with /projects/hostlist-server/"; exit 1 ;;
+          esac
+
+      - name: Deploy runtime files over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: deploy/
+          server-dir: ${{ vars.FTP_SERVER_DIR }}
+          state-name: .ftp-deploy-hostlist-server-sync-state.json
+          dangerous-clean-slate: false
+          log-level: standard

@@ -1,0 +1,10 @@
+Options -Indexes
+DirectoryIndex index.php
+RewriteEngine On
+RewriteRule ^(?:scripts|src|output|tests|\.git)(?:/|$) - [F,L]
+RewriteRule ^\.ftp-deploy-hostlist-server-sync-state\.json$ - [F,L]
+RewriteRule ^(?:README\.md|schema\.sql|config\.json|Dockerfile|docker-compose\.yml|\.dockerignore|\.gitignore|\.env(?:\..*)?)$ - [F,L,NC]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+RewriteRule ^ index.php [QSA,L]

@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: hostlist_demo
+      MYSQL_USER: hostlist
+      MYSQL_PASSWORD: hostlist-local
+      MYSQL_ROOT_PASSWORD: hostlist-root-local
+    volumes:
+      - hostlist_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  seed:
+    build: .
+    command: ["php", "scripts/seed-db.php"]
+    environment:
+      DB_HOST: db
+      DB_NAME: hostlist_demo
+      DB_USER: hostlist
+      DB_PASSWORD: hostlist-local
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      APP_BASE_PATH: ""
+      DB_HOST: db
+      DB_NAME: hostlist_demo
+      DB_USER: hostlist
+      DB_PASSWORD: hostlist-local
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+volumes:
+  hostlist_mysql:
